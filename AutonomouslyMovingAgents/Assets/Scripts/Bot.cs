@@ -129,9 +129,46 @@ public class Bot : MonoBehaviour
         return false;
     }
 
+    bool TargetCanSeeMe()
+    {
+        Vector3 toAgent = this.transform.position - target.transform.position;
+        float lookAngle = Vector3.Angle(target.transform.forward, toAgent);
+
+        if(lookAngle < 60)
+            return true;
+        return false;
+    }
+
+    bool coolDown = false;
+
+    void BehaviorCoolDown()
+    {
+        coolDown = false;
+    }
+
+    bool TargetInRange()
+    {
+        if(Vector3.Distance(this.transform.position, target.transform.position) < 10)
+            return true;
+        return false;
+    }
+
     void Update()
     {
-        if(CanSeeTarget())
-            CleverHide();
+        if (!coolDown)
+        {
+            if (!TargetInRange())
+            {
+                Wander();
+            }
+            else if (CanSeeTarget() && TargetCanSeeMe())
+            {
+                CleverHide();
+                coolDown = true;
+                Invoke("BehaviorCoolDown", 3);
+            }
+            else
+                Pursue();
+        }
     }
 }
